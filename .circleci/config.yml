@@ -1,5 +1,33 @@
 version: 2.1
 jobs:
+  firmware-build:
+    docker:
+      - image: kktech/firmware:v13
+    working_directory: ~/keepkey-firmware
+    steps:
+      - checkout
+      - run:
+          name: Update Submodules
+          command: |
+            git submodule update --init --recursive
+      - setup_remote_docker
+      - run:
+          name: Build Emulator and Run Tests
+          command: |
+            mkdir /root/build && cd /root/build
+            cmake -C /root/keepkey-firmware/cmake/caches/device.cmake /root/keepkey-firmware \
+              -DCMAKE_BUILD_TYPE=MinSizeRel \
+              -DCMAKE_COLOR_MAKEFILE=ON
+            make
+            mkdir -p /root/keepkey-firmware/bin
+            cp -r /root/build /root/keepkey-firmware/bin/
+            cp bin/*.bin /root/keepkey-firmware/bin/
+            cp bin/*.elf /root/keepkey-firmware/bin/
+            chown -R `stat -c "%u:%g" /root/keepkey-firmware` /root/keepkey-firmware/bin
+      - store_artifacts:
+          path: ./bin/firmware.keepkey.bin
+          destination: Release/firmware.keepkey.bin
+
   emulator-build-test:
     docker:
       - image: circleci/python:3.7
@@ -54,12 +82,6 @@ jobs:
 
 workflows:
   version: 2
-  emulator:
+  firmware:
     jobs:
-      - emulator-build-test
-      - emulator-publish:
-          filters:
-            branches:
-              only: master
-          requires:
-            - emulator-build-test
+      - firmware-build
