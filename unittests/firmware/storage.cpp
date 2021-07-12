@@ -537,7 +537,7 @@ TEST(Storage, StorageRoundTrip) {
 
   std::vector<uint8_t> flash(2048);
 
-  storage_writeV16((char *)&flash[0], flash.size(), &start);
+  storage_writeV17((char *)&flash[0], flash.size(), &start);
 
 #if 0
     printf("        ");

@@ -28,7 +28,10 @@
 #define EXTERNAL_SALT_SIZE 32
 
 typedef struct _Storage {
-  uint32_t version;
+  uint8_t version;
+  uint8_t fw_version_major;
+  uint8_t fw_version_minor;
+  uint8_t fw_version_patch;
   struct Public {
     uint8_t wrapped_storage_key[64];
     uint8_t storage_key_fingerprint[32];
@@ -190,9 +193,9 @@ void storage_readV1(SessionState *session, ConfigFlash *dst, const char *ptr,
 void storage_readV2(SessionState *session, ConfigFlash *dst, const char *ptr,
                     size_t len);
 void storage_readV11(ConfigFlash *dst, const char *ptr, size_t len);
-void storage_readV16(ConfigFlash *dst, const char *ptr, size_t len);
+void storage_readV17(ConfigFlash *dst, const char *ptr, size_t len);
 void storage_writeV11(char *ptr, size_t len, const ConfigFlash *src);
-void storage_writeV16(char *ptr, size_t len, const ConfigFlash *src);
+void storage_writeV17(char *ptr, size_t len, const ConfigFlash *src);
 
 void storage_readMeta(Metadata *meta, const char *ptr, size_t len);
 void storage_readPolicyV1(PolicyType *policy, const char *ptr, size_t len);

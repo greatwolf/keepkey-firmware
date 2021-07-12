@@ -127,14 +127,32 @@ it easier to extend for new features later on.
 | reserved                  | char[63]       |           63 |            445 |
 
 
-STORAGE_VERSION 16 layout
+STORAGE_VERSION 16-17 layout
 -------------------------
+
+Storage versions 16 and 17 are identical, except that v16 uses a little-endian
+u32 `version` field and omits `fw_(major|minor|patch)_version`; this is equivalent
+to the v17 structure where the firmware version fields are set to zero.
+
+Firmware which uses v17 will load (and upgrade) either type if it contains an
+older firmware version number, but will refuse to load a version tagged as coming
+from a newer version. Firmware which only recognized v16 and older will refuse to
+load v17 at all.
+
+This provides effective downgrade protection for the storage area. Each time you
+updated to a new version that uses v17, the storage will get marked in a way that
+makes it unrecognized by older firmware versions. Downgrading will therefore require
+re-initializing your device, protecting updated users from as-yet-undiscovered
+security issues in older versions.
 
 #### Public(ish) Storage
 
 | Field                     | Type           | Size (bytes) | Offset (bytes) |
 | ------------------------- | -------------- | ------------ | -------------- |
-| version                   | u32            |            4 |              0 |
+| version                   | u8             |            1 |              0 |
+| fw_major_version          | u8             |            1 |              1 |
+| fw_minor_version          | u8             |            1 |              2 |
+| fw_patch_version          | u8             |            1 |              3 |
 | flags                     | u32            |            4 |              4 |
 |   has_pin                 |   bit 0        |              |                |
 |   has_language            |   bit 1        |              |                |
